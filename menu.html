@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>美食选择转盘</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        background-color: #f5f5f5;
+        font-family: "Microsoft YaHei", sans-serif;
+      }
+
+      .container {
+        position: relative;
+        width: 380px;
+        height: 380px;
+        margin-bottom: 30px;
+      }
+
+      .wheel {
+        width: 100%;
+        height: 100%;
+        position: relative;
+        border-radius: 50%;
+        border: 10px solid #333;
+        overflow: hidden;
+        transition: transform 4s cubic-bezier(0.17, 0.67, 0.12, 0.99);
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+      }
+
+      .section {
+        position: absolute;
+        width: 50%;
+        height: 50%;
+        transform-origin: bottom right;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 18px;
+        font-weight: bold;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+        overflow: hidden;
+      }
+
+      .section span {
+        display: inline-block;
+        transform: rotate(120deg);
+        width: 100px;
+        text-align: center;
+        padding-bottom: 100px;
+        letter-spacing: 1px;
+      }
+
+      .pointer {
+        position: absolute;
+        bottom: 10px;
+        left: 50%;
+        transform: translateX(-50%) rotate(180deg);
+        width: 30px;
+        height: 30px;
+        background-color: #ff5252;
+        clip-path: polygon(50% 100%, 0% 0%, 100% 0%);
+        z-index: 10;
+      }
+
+      .spin-btn {
+        padding: 12px 30px;
+        background-color: #ff5252;
+        color: white;
+        border: none;
+        border-radius: 30px;
+        font-size: 18px;
+        cursor: pointer;
+        transition: all 0.3s;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      }
+
+      .spin-btn:hover {
+        background-color: #ff3232;
+        transform: scale(1.05);
+      }
+
+      .result {
+        margin-top: 20px;
+        font-size: 24px;
+        font-weight: bold;
+        color: #333;
+        height: 30px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1 style="margin-bottom: 30px">今天吃什么？</h1>
+    <div class="container">
+      <div class="wheel" id="wheel"></div>
+      <div class="pointer"></div>
+    </div>
+    <button class="spin-btn" id="spin">开始转动</button>
+    <div class="result" id="result"></div>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        const wheel = document.getElementById("wheel");
+        const spinBtn = document.getElementById("spin");
+        const result = document.getElementById("result");
+
+        // 食物选项
+        const foods = [
+          { name: "黄焖鸡", color: "#FF9800" },
+          { name: "麻辣香锅", color: "#F44336" },
+          { name: "水饺", color: "#4CAF50" },
+          { name: "肯德基", color: "#E91E63" },
+          { name: "兰州拉面", color: "#3F51B5" },
+          { name: "外卖", color: "#9C27B0" },
+          { name: "塔斯汀", color: "#009688" },
+        ];
+
+        // 创建转盘扇区
+        foods.forEach((food, index) => {
+          const section = document.createElement("div");
+          section.className = "section";
+          section.style.backgroundColor = food.color;
+
+          // 计算旋转角度
+          const rotationAngle = index * (360 / foods.length);
+          section.style.transform = `rotate(${rotationAngle}deg) skewY(${
+            90 - 360 / foods.length
+          }deg)`;
+
+          // 添加文字
+          const text = document.createElement("span");
+          text.textContent = food.name;
+          section.appendChild(text);
+
+          wheel.appendChild(section);
+        });
+
+        // 是否正在旋转
+        let isSpinning = false;
+
+        // 点击按钮旋转
+        spinBtn.addEventListener("click", () => {
+          if (isSpinning) return;
+
+          isSpinning = true;
+          result.textContent = "";
+
+          // 随机旋转角度 (5-10圈 + 随机偏移)
+          const spinAngle = 1800 + Math.floor(Math.random() * 1800);
+          wheel.style.transform = `rotate(${spinAngle}deg)`;
+
+          // 计算结果
+          setTimeout(() => {
+            const actualRotation = spinAngle % 360;
+            const sectionAngle = 360 / foods.length;
+            // 修正计算逻辑，考虑指针位置和转盘旋转方向
+            // 由于转盘是顺时针旋转，而且我们要找到指针指向的扇区
+            // 需要用总度数减去实际旋转度数，然后计算对应的扇区
+            const adjustedRotation = (360 - actualRotation) % 360;
+            const sectionIndex = Math.floor(adjustedRotation / sectionAngle) % foods.length;
+
+            // result.textContent = `今天就吃：${foods[sectionIndex].name}！`;
+            isSpinning = false;
+          }, 4000);
+        });
+      });
+    </script>
+  </body>
+</html>
